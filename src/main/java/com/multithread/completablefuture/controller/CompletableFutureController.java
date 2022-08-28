@@ -23,22 +23,28 @@ public class CompletableFutureController {
 	CompletableFutureService completableFutureService;
 	
 	@GetMapping("/result")
-	public AllData getResult() throws InterruptedException, ExecutionException {
+	public AllData getResult() {
 		log.info("getResult Start");
 		
 		CompletableFuture<Person> person = completableFutureService.getPersons();
 		CompletableFuture<Product> product = completableFutureService.getProducts();
+		/*person.thenApply(p -> p.getFirstName());*/
 		
 		CompletableFuture<String> combineResult = person.thenCombine(product, (s1,s2)->"Person name : "+s1.getFirstName()+" : "+" Product Name : "+s2.getName());
-		
-		log.info("Combined Result : "+combineResult.get());
-		
-		log.info("Person Details --- " + person.get());
-		log.info("Product Details --- " + product.get());
-		
 		AllData allData = new AllData();
-		allData.setPerson(person.get());
-		allData.setProduct(product.get());
+		try {
+			Person per = person.get();
+			Product prod = product.get();
+			allData.setPerson(per);
+			allData.setProduct(prod);
+			log.info("Combined Result : "+combineResult.get());
+			log.info("Person Details --- " + person.get());
+			log.info("Product Details --- " + product.get());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
 		return allData;
 		
 	}

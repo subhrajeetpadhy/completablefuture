@@ -22,25 +22,32 @@ public class CompletableFutureService {
 	Executor executor = Executors.newFixedThreadPool(5);
 	
 
-	public CompletableFuture<Person> getPersons() throws InterruptedException, ExecutionException {
+	public CompletableFuture<Person> getPersons() {
 		log.info("getPersons starts");
 		CompletableFuture<Person> personCompletableFuture = CompletableFuture.supplyAsync(()->{
 			Person person = restTemplate.getForObject("http://localhost:8080/persons", Person.class);
 			System.out.println("getPersons - Thread Name -"+Thread.currentThread().getName());
 			return person;
-		}, executor);
+		}, executor).exceptionally(ex -> {
+			System.out.println(ex.getMessage());
+			return new Person();
+			}
+		);
 		//Thread.sleep(1000L);	//delay
 		log.info("getPersons completed");
 		return personCompletableFuture;
 	}
 	
-	public CompletableFuture<Product> getProducts() throws InterruptedException, ExecutionException {
+	public CompletableFuture<Product> getProducts() {
 		log.info("getProducts starts");
 		CompletableFuture<Product> productCompletableFuture = CompletableFuture.supplyAsync(()->{
 			Product product = restTemplate.getForObject("http://localhost:8080/products", Product.class);
 			System.out.println("getProducts - Thread Name -"+Thread.currentThread().getName());
 			return product;
-		}, executor);
+		}, executor).exceptionally(ex -> {
+			System.out.println(ex.getMessage());
+			return new Product();
+		});
 		log.info("getProducts completed");
 		//Thread.sleep(1000L);	//delay
 		return productCompletableFuture;
